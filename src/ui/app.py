@@ -3,7 +3,7 @@ import random
 
 st.set_page_config(page_title="AI Spēle")
 
-# --------- Fake sākuma skaitļi (kamēr nav loģikas) ---------
+# --------- Fake sākuma skaitļi (kamēr nav piesaste ar loģiku) ---------
 def generate_start_numbers():
     nums = []
     while len(nums) < 5:
