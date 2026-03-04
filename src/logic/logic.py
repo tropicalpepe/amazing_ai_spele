@@ -42,9 +42,9 @@ def is_game_over(current_number: int) -> bool:
 
 def calculate_final_payout(final_state: 'GameState') -> 'GameState':
     new_state = final_state
-    if(new_state.is_player_turn) # Last move was made by AI
+    if(new_state.is_player_turn): # Last move was made by AI
         new_state.ai_points += final_state.bank_points
-    else
+    else:
         new_state.player_points += final_state.bank_points
 
     return new_state
