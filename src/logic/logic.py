@@ -38,25 +38,13 @@ def apply_move(current_state: GameState, divisor: int) -> GameState:
     )
 
 def is_game_over(current_number: int) -> bool:
-    """
-    Pārbauda, vai ir iestājies spēles beigu nosacījums.
-    
-    Args:
-        current_number (int): Skaitlis PĒC gājiena izpildes.
-        
-    Returns:
-        bool: True, ja current_number <= 10.
-    """
-    pass
+    return current_number <= 10
 
 def calculate_final_payout(final_state: 'GameState') -> 'GameState':
-    """
-    Izpilda bankas punktu sadali spēles beigās.
-    
-    Args:
-        final_state (GameState): Spēles stāvoklis brīdī, kad is_game_over == True.
-        
-    Returns:
-        GameState: Gala stāvoklis ar tukšu banku un atjauninātiem spēlētāju punktiem.
-    """
-    pass
+    new_state = final_state
+    if(new_state.is_player_turn) # Last move was made by AI
+        new_state.ai_points += final_state.bank_points
+    else
+        new_state.player_points += final_state.bank_points
+
+    return new_state
