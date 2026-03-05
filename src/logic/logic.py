@@ -1,16 +1,6 @@
 from typing import List
 
-# Pagaidam kamer nav data.py atstajam GameState seit
-class GameState:
-    """
-    Nemainīgs (immutable) datu objekts, kas atspoguļo vienu spēles mirkli.
-    UI un Loģikas komandas izmantos šo, lai nolasītu datus.
-    """
-    current_number: int
-    player_points: int
-    ai_points: int
-    bank_points: int
-    is_player_turn: bool
+from data.data import GameState
 
 def generate_starting_numbers() -> List[int]:
     import random
@@ -40,7 +30,7 @@ def apply_move(current_state: GameState, divisor: int) -> GameState:
 def is_game_over(current_number: int) -> bool:
     return current_number <= 10
 
-def calculate_final_payout(final_state: 'GameState') -> 'GameState':
+def calculate_final_payout(final_state: GameState) -> GameState:
     new_state = final_state
     if(new_state.is_player_turn): # Last move was made by AI
         new_state.ai_points += final_state.bank_points
@@ -48,3 +38,38 @@ def calculate_final_payout(final_state: 'GameState') -> 'GameState':
         new_state.player_points += final_state.bank_points
 
     return new_state
+
+
+def alpha_beta(state: GameState, depth: int, alpha: float, beta: float, is_maximizing: bool) -> int:
+    if is_game_over(state.current_number):
+        return state.player_points - state.ai_points
+    
+    moves = []
+    if is_valid_move(state.current_number, 2):
+        moves.append(2)
+    if is_valid_move(state.current_number, 3):
+        moves.append(3)
+
+    if is_maximizing:
+        max_eval = float('-inf')
+        for divisor in moves:
+            new_state = apply_move(state, divisor)
+            eval = alpha_beta(new_state, depth-1, alpha, beta, False)
+            max_eval = max(max_eval, eval)
+            alpha = max(alpha, eval)
+            if beta <= alpha:
+                break
+
+        return max_eval
+    
+    else:
+        min_eval = float('inf')
+        for divisor in moves:
+            new_state = apply_move(state, divisor)
+            eval = alpha_beta(new_state, depth-1, alpha, beta, True)
+            min_eval = min(min_eval, eval)
+            beta = min(beta, eval)
+            if beta <= alpha:
+                break
+            
+        return min_eval
