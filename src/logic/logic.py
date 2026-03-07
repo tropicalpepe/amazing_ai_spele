@@ -1,84 +1,140 @@
 from typing import List
-from amazing_ai_spele.src.data.data import GameState
+from src.data.data import GameState
+
 
 def generate_starting_numbers() -> List[int]:
+    """Generates 5 random numbers divisible by 6 in range [10000, 20000]"""
     import random
-    start = 10002 # Pirmais skaitlis kas dalās ar 6 un ir >= 10000
-    end   = 19998 # Pēdējais skaitlis kas dalās ar 6 un ir <= 20000
+    start = 10002  # First number divisible by 6 and >= 10000
+    end = 19998    # Last number divisible by 6 and <= 20000
     divisible_by_6 = list(range(start, end + 1, 6))
 
     return random.sample(divisible_by_6, 5)
 
+
+# ===== Move Generation and Validation =====
+
+def get_legal_moves(state: GameState) -> List[int]:
+    """
+    Returns list of legal divisors for current state.
+
+    Returns:
+        List of valid divisors: [], [2], [3], or [2, 3]
+    """
+    moves = []
+    if state.current_number % 3 == 0:
+        moves.append(3)
+    if state.current_number % 2 == 0:
+        moves.append(2)
+    return moves
+
+
 def is_valid_move(current_number: int, divisor: int) -> bool:
+    """Checks if a divisor is valid for the current number"""
     return current_number % divisor == 0
 
+
+# ===== State Transitions =====
+
 def apply_move(current_state: GameState, divisor: int) -> GameState:
+    """
+    Applies a move and returns new game state.
+
+    Scoring rules:
+    - Divide by 2: opponent gets 2 points
+    - Divide by 3: current player gets 3 points
+    - Result ends in 0 or 5: 1 point to bank
+
+    Args:
+        current_state: Current game state
+        divisor: The divisor to apply (2 or 3)
+
+    Returns:
+        New game state after the move
+    """
     new_number = current_state.current_number // divisor
-    points_to_last = 3 if divisor == 3 else 0
-    points_to_next = 2 if divisor == 2 else 0
+    points_to_current = 3 if divisor == 3 else 0
+    points_to_opponent = 2 if divisor == 2 else 0
     points_to_bank = 1 if new_number % 5 == 0 else 0
 
     return GameState(
-        current_number  = new_number,
-        player_points   = current_state.player_points + (points_to_last if current_state.is_player_turn else points_to_next),
-        ai_points       = current_state.ai_points + (points_to_next if current_state.is_player_turn else points_to_last),
-        bank_points     = current_state.bank_points + points_to_bank,
-        is_player_turn  = not current_state.is_player_turn,
-        is_game_over = False
+        current_number=new_number,
+        player_points=current_state.player_points + (points_to_current if current_state.is_player_turn else points_to_opponent),
+        ai_points=current_state.ai_points + (points_to_opponent if current_state.is_player_turn else points_to_current),
+        bank_points=current_state.bank_points + points_to_bank,
+        is_player_turn=not current_state.is_player_turn
     )
 
-def is_game_over(current_number: int) -> bool:
-    if current_number % 2 != 0 and current_number % 3 != 0:
+
+# ===== Terminal State Detection =====
+
+def is_terminal_state(state: GameState) -> bool:
+    """
+    Checks if game is over.
+
+    Game ends when:
+    - Current number <= 10
+    - No legal moves available
+
+    Args:
+        state: Game state to check
+
+    Returns:
+        True if game is over, False otherwise
+    """
+    if state.current_number <= 10:
         return True
-    return current_number <= 10
+    return len(get_legal_moves(state)) == 0
 
 
-def calculate_final_payout(final_state: GameState) -> GameState:
-    new_state = final_state
-    if(new_state.is_player_turn):
-        new_state.ai_points += final_state.bank_points
+# ===== Final Payout and Winner Determination =====
+
+def apply_final_payout(state: GameState) -> GameState:
+    """
+    Awards bank points to the player who made the final move.
+
+    The player whose turn it is NOT gets the bank (they just moved).
+
+    Args:
+        state: Terminal game state
+
+    Returns:
+        State with bank awarded to the last player
+    """
+    if state.is_player_turn:
+        # AI made the last move (now it's player's turn)
+        return GameState(
+            current_number=state.current_number,
+            player_points=state.player_points,
+            ai_points=state.ai_points + state.bank_points,
+            bank_points=0,
+            is_player_turn=state.is_player_turn
+        )
     else:
-        new_state.player_points += final_state.bank_points
-    final_state.bank_points=0
-    return new_state
+        # Player made the last move (now it's AI's turn)
+        return GameState(
+            current_number=state.current_number,
+            player_points=state.player_points + state.bank_points,
+            ai_points=state.ai_points,
+            bank_points=0,
+            is_player_turn=state.is_player_turn
+        )
 
 
-def alpha_beta(state: GameState, depth: int, alpha: float, beta: float, is_maximizing: bool) -> int:
+def determine_winner(state: GameState) -> str:
+    """
+    Determines the winner of the game.
 
-    if depth == 0 or is_game_over(state.current_number):
-        return state.ai_points - state.player_points ##Ai is maximizer
+    Args:
+        state: Terminal game state
 
-    moves = []
-    if is_valid_move(state.current_number, 3):
-        moves.append(3)
-    if is_valid_move(state.current_number, 2):
-        moves.append(2)
-
-    if not moves:
-        return state.ai_points - state.player_points
-
-    if is_maximizing:
-        max_eval = float('-inf')
-        for divisor in moves:
-            new_state = apply_move(state, divisor)
-            curr_eval = alpha_beta(new_state, depth - 1, alpha, beta, False)
-            max_eval = max(max_eval, curr_eval)
-            alpha = max(alpha, curr_eval)
-            if beta <= alpha:
-                break
-
-        return max_eval
-
+    Returns:
+        'AI', 'Player', or 'Tie'
+    """
+    final_state = apply_final_payout(state)
+    if final_state.ai_points > final_state.player_points:
+        return 'AI'
+    elif final_state.player_points > final_state.ai_points:
+        return 'Player'
     else:
-        min_eval = float('inf')
-        for divisor in moves:
-            new_state = apply_move(state, divisor)
-            curr_eval = alpha_beta(new_state, depth - 1, alpha, beta, True)
-            min_eval = min(min_eval, curr_eval)
-            beta = min(beta, curr_eval)
-            if beta <= alpha:
-                break
-
-        return min_eval
-
-
+        return 'Tie'
