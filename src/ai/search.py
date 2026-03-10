@@ -135,6 +135,68 @@ def alpha_beta_search(
         return min_eval
 
 
+# ===== Minimax Search =====
+
+def minimax_search(
+    node: GameTreeNode,
+    depth: int,
+    is_maximizing: bool,
+    metrics: Optional[AIMetrics] = None
+) -> float:
+    """
+    Minimax search on game tree nodes (exhaustive evaluation without pruning).
+
+    Args:
+        node: Current tree node
+        depth: Remaining search depth
+        is_maximizing: True if maximizing player's turn
+        metrics: Optional metrics tracker
+
+    Returns:
+        Evaluation score from current node
+    """
+    # Base cases
+    if depth == 0 or node.is_terminal:
+        if node.is_terminal:
+            node.evaluation = evaluate_terminal_state(node.state)
+        else:
+            node.evaluation = evaluate_heuristic(node.state)
+
+        if metrics:
+            metrics.nodes_evaluated += 1
+
+        return node.evaluation
+
+    # Expand if needed
+    if not node.children:
+        expand_node(node, metrics)
+
+    if not node.children:  # No legal moves
+        node.evaluation = evaluate_terminal_state(node.state)
+        if metrics:
+            metrics.nodes_evaluated += 1
+        return node.evaluation
+
+    if is_maximizing:
+        max_eval = float('-inf')
+        for move, child in node.children.items():
+            curr_eval = minimax_search(child, depth - 1, False, metrics)
+            if curr_eval > max_eval:
+                max_eval = curr_eval
+                node.best_move = move
+        node.evaluation = max_eval
+        return max_eval
+    else:
+        min_eval = float('inf')
+        for move, child in node.children.items():
+            curr_eval = minimax_search(child, depth - 1, True, metrics)
+            if curr_eval < min_eval:
+                min_eval = curr_eval
+                node.best_move = move
+        node.evaluation = min_eval
+        return min_eval
+
+
 # ===== Best Move Selector =====
 
 def find_best_move_alpha_beta(state: GameState, depth: int) -> tuple[int, AIMetrics]:
