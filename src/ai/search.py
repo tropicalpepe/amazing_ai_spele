@@ -236,3 +236,41 @@ def find_best_move_alpha_beta(state: GameState, depth: int) -> tuple[int, AIMetr
     metrics.best_move = root.best_move
 
     return root.best_move, metrics
+
+
+def find_best_move_minimax(state: GameState, depth: int) -> tuple[int, AIMetrics]:
+    """
+    Finds the best move using minimax.
+
+    Args:
+        state: Current game state
+        depth: Search depth limit
+
+    Returns:
+        Tuple of (best_move, metrics)
+    """
+    metrics = AIMetrics()
+    start_time = time.time()
+
+    # Create root node
+    root = create_node(state, 0, metrics)
+
+    # Determine if AI is maximizing (AI's turn means minimizer just moved)
+    is_maximizing = not state.is_player_turn
+
+    # Run minimax search
+    score = minimax_search(
+        root,
+        depth,
+        is_maximizing,
+        metrics
+    )
+
+    # Calculate elapsed time
+    elapsed_time = time.time() - start_time
+    metrics.elapsed_ms = elapsed_time * 1000
+    metrics.best_score = score
+    metrics.best_move = root.best_move
+
+    return root.best_move, metrics
+
