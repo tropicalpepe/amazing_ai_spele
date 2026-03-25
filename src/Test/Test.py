@@ -18,6 +18,7 @@ def simulate_game_alpha_beta(start_number):
 
     total_generated = 0
     total_evaluated = 0
+    total_pruned = 0
     total_time = 0
     ai_moves = 0
 
@@ -49,6 +50,7 @@ def simulate_game_alpha_beta(start_number):
                   f"time: {metrics.elapsed_ms:.2f}ms)")
             total_generated += metrics.nodes_generated
             total_evaluated += metrics.nodes_evaluated
+            total_pruned += metrics.pruned_branches
             total_time += metrics.elapsed_ms
             ai_moves += 1
 
@@ -71,7 +73,7 @@ def simulate_game_alpha_beta(start_number):
     final_metrics.best_move = metrics.best_move
     final_metrics.best_score = metrics.best_score
     final_metrics.elapsed_ms = total_time / ai_moves if ai_moves else 0
-
+    final_metrics.pruned_branches = total_pruned
     return winner, final_metrics
 
 
@@ -148,4 +150,5 @@ def simulate_game_minimax(start_number):
 
 #print(simulate_game_minimax(random.choice(generate_starting_numbers())))
 #print(simulate_game_alpha_beta(random.choice(generate_starting_numbers())))
-
+#print(simulate_game_minimax(20995200))
+#print(simulate_game_alpha_beta(20995200))
