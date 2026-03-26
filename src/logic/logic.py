@@ -3,10 +3,10 @@ from src.data.data import GameState
 
 
 def generate_starting_numbers() -> List[int]:
-    """Generates 5 random numbers divisible by 6 in range [10000, 20000]"""
+    """Generates 5 random numbers divisible by 6 in range [1000, 2000]"""
     import random
-    start = 10002  # First number divisible by 6 and >= 10000
-    end = 19998    # Last number divisible by 6 and <= 20000
+    start = 1002  # First number divisible by 6 and >= 1000
+    end = 1998    # Last number divisible by 6 and <= 2000
     divisible_by_6 = list(range(start, end + 1, 6))
 
     return random.sample(divisible_by_6, 5)
@@ -16,46 +16,68 @@ def generate_starting_numbers() -> List[int]:
 
 def get_legal_moves(state: GameState) -> List[int]:
     """
-    Returns list of legal divisors for current state.
+    Returns list of legal moves for current state.
 
     Returns:
-        List of valid divisors: [], [2], [3], or [2, 3]
+        List of valid moves which can be either division (2, 3) or subtraction (-5, -7)
     """
     moves = []
     if state.current_number % 3 == 0:
         moves.append(3)
     if state.current_number % 2 == 0:
         moves.append(2)
+        
+    # Subtraction moves are always legal
+    moves.append(-5)
+    moves.append(-7)
+    
     return moves
 
 
-def is_valid_move(current_number: int, divisor: int) -> bool:
-    """Checks if a divisor is valid for the current number"""
-    return current_number % divisor == 0
+def is_valid_move(current_number: int, move: int) -> bool:
+    """Checks if a move is valid for the current number"""
+    if move in (-5, -7):
+        return True
+    return current_number % move == 0
 
 
 # ===== State Transitions =====
 
-def apply_move(current_state: GameState, divisor: int) -> GameState:
+def apply_move(current_state: GameState, move: int) -> GameState:
     """
     Applies a move and returns new game state.
 
     Scoring rules:
     - Divide by 2: opponent gets 2 points
     - Divide by 3: current player gets 3 points
-    - Result ends in 0 or 5: 1 point to bank
+    - Subtract 5: 1 point to bank
+    - Subtract 7: opponent gets 1 point
 
     Args:
         current_state: Current game state
-        divisor: The divisor to apply (2 or 3)
+        move: The move to apply (2, 3, -5, or -7)
 
     Returns:
         New game state after the move
     """
-    new_number = current_state.current_number // divisor
-    points_to_current = 3 if divisor == 3 else 0
-    points_to_opponent = 2 if divisor == 2 else 0
-    points_to_bank = 1 if new_number % 5 == 0 else 0
+    points_to_current = 0
+    points_to_opponent = 0
+    points_to_bank = 0
+
+    if move == 2:
+        new_number = current_state.current_number // 2
+        points_to_opponent = 2
+    elif move == 3:
+        new_number = current_state.current_number // 3
+        points_to_current = 3
+    elif move == -5:
+        new_number = current_state.current_number - 5
+        points_to_bank = 1
+    elif move == -7:
+        new_number = current_state.current_number - 7
+        points_to_opponent = 1
+    else:
+        raise ValueError("Invalid move")
 
     return GameState(
         current_number=new_number,

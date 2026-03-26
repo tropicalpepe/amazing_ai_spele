@@ -163,7 +163,7 @@ else:
                 legal = summary["legal_moves"]
                 st.write("**Tavas pieejamās darbības:**")
 
-                cols = st.columns(2)
+                cols = st.columns(4)
                 # Show divide by 2 button only if legal
                 if 2 in legal:
                     with cols[0]:
@@ -192,6 +192,34 @@ else:
                             except (ValueError, RuntimeError) as e:
                                 st.error(str(e))
                             st.rerun()
+                # Show subtract 5 button only if legal
+                if -5 in legal:
+                    with cols[2]:
+                        if st.button("Atņemt 5", use_container_width=True):
+                            try:
+                                before = summary["current_number"]
+                                controller.make_move(-5)
+                                after = controller.state.current_number
+                                st.session_state.game_history.append(
+                                    f"Cilvēks: {before} - 5 = {after}"
+                                )
+                            except (ValueError, RuntimeError) as e:
+                                st.error(str(e))
+                            st.rerun()
+                # Show subtract 7 button only if legal
+                if -7 in legal:
+                    with cols[3]:
+                        if st.button("Atņemt 7", use_container_width=True):
+                            try:
+                                before = summary["current_number"]
+                                controller.make_move(-7)
+                                after = controller.state.current_number
+                                st.session_state.game_history.append(
+                                    f"Cilvēks: {before} - 7 = {after}"
+                                )
+                            except (ValueError, RuntimeError) as e:
+                                st.error(str(e))
+                            st.rerun()
 
             else:
                 # --------- AI turn screen ---------
@@ -208,8 +236,9 @@ else:
                     after = controller.state.current_number
                     st.session_state.last_ai_move = move
                     st.session_state.last_ai_metrics = metrics
+                    op_str = f"÷ {move}" if move > 0 else f"- {abs(move)}"
                     st.session_state.game_history.append(
-                        f"AI: {before} ÷ {move} = {after}"
+                        f"AI: {before} {op_str} = {after}"
                     )
 
                 except TypeError:
@@ -218,8 +247,9 @@ else:
                     after = controller.state.current_number
                     st.session_state.last_ai_move = move
                     st.session_state.last_ai_metrics = metrics
+                    op_str = f"÷ {move}" if move > 0 else f"- {abs(move)}"
                     st.session_state.game_history.append(
-                        f"AI: {before} ÷ {move} = {after}"
+                        f"AI: {before} {op_str} = {after}"
                     )
 
                 except RuntimeError as e:

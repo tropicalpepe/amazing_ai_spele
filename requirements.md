@@ -10,22 +10,26 @@ Your team has been assigned the following game.
 *(Note: You are permitted to modify these rules if you encounter undefined states, if the end state becomes unreachable, or if the initial rules result in a game tree so simple that it can be fully generated, which would defeat the purpose of creating a heuristic evaluation function).*
 
 ### Game Setup
-1. **Initial Numbers:** At the start of the game, the software must randomly generate 5 numbers in the range of **10,000 to 20,000**. These initial numbers must be perfectly divisible by both 2 and 3 (i.e., divisible by 6).
+1. **Initial Numbers:** At the start of the game, the software must randomly generate 5 numbers in the range of **1,000 to 2,000**. These initial numbers must be perfectly divisible by both 2 and 3 (i.e., divisible by 6).
 2. **Player Selection:** The human player chooses one of the 5 generated numbers to start the game.
 3. **Points and Bank:** Both players start with **0 points**. There is also a "Game Bank" that starts at **0 points**.
 
 ### Gameplay
 * Players take turns making moves. 
-* In each turn, the current player must divide the current number by either **2** or **3**.
-* **Restriction:** A division is only allowed if the resulting number is a whole number (integer).
+* In each turn, the current player can choose one of four actions to apply to the current number:
+  1. **Divide by 2** (Allowed only if the resulting number is a whole integer).
+  2. **Divide by 3** (Allowed only if the resulting number is a whole integer).
+  3. **Subtract 5** (Always allowed).
+  4. **Subtract 7** (Always allowed).
 * **Scoring:**
-    * If the number is divided by **2**, the **opponent** receives **2 points**.
-    * If the number is divided by **3**, the **current player** receives **3 points**.
-* **Bank Addition:** If the result of the division is a number that ends in **0 or 5**, **1 point** is added to the Game Bank.
+    * If the player divides by **2**, the **opponent** receives **2 points**.
+    * If the player divides by **3**, the **current player** receives **3 points**.
+    * If the player subtracts **5**, **1 point** is added to the Game Bank.
+    * If the player subtracts **7**, the **opponent** receives **1 point**.
 
 ### Endgame and Winning
 * The game ends as soon as the current number is **less than or equal to 10**.
-* The player whose move triggers the end of the game (the one who makes the final division) collects the Bank, adding all Bank points to their own score.
+* The player whose move triggers the end of the game (the one whose action lowers the number to 10 or less) collects the Bank, adding all Bank points to their own score.
 * **Victory:** The player with the most points wins. If both players have the same amount of points, the game is a tie.
 
 ---
