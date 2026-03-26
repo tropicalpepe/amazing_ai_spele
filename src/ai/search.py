@@ -67,8 +67,12 @@ def alpha_beta_search(
     alpha: float,
     beta: float,
     is_maximizing: bool,
-    metrics: Optional[AIMetrics] = None
+    metrics: Optional[AIMetrics] = None,
+    start_time: float = 0.0,
+    timeout: float = 10.0
 ) -> float:
+    if start_time > 0 and (time.time() - start_time > timeout):
+        raise TimeoutError(f"AI algoritms tika apturēts: pārsniegts {timeout}s limits. Lūdzu samaziniet dziļumu!")
     """
     Alpha-beta pruning search on game tree nodes.
 
@@ -108,7 +112,7 @@ def alpha_beta_search(
     if is_maximizing:
         max_eval = float('-inf')
         for move, child in node.children.items():
-            curr_eval = alpha_beta_search(child, depth - 1, alpha, beta, False, metrics)
+            curr_eval = alpha_beta_search(child, depth - 1, alpha, beta, False, metrics, start_time, timeout)
             if curr_eval > max_eval:
                 max_eval = curr_eval
                 node.best_move = move
@@ -122,7 +126,7 @@ def alpha_beta_search(
     else:
         min_eval = float('inf')
         for move, child in node.children.items():
-            curr_eval = alpha_beta_search(child, depth - 1, alpha, beta, True, metrics)
+            curr_eval = alpha_beta_search(child, depth - 1, alpha, beta, True, metrics, start_time, timeout)
             if curr_eval < min_eval:
                 min_eval = curr_eval
                 node.best_move = move
@@ -141,8 +145,12 @@ def minimax_search(
     node: GameTreeNode,
     depth: int,
     is_maximizing: bool,
-    metrics: Optional[AIMetrics] = None
+    metrics: Optional[AIMetrics] = None,
+    start_time: float = 0.0,
+    timeout: float = 10.0
 ) -> float:
+    if start_time > 0 and (time.time() - start_time > timeout):
+        raise TimeoutError(f"AI algoritms tika apturēts: pārsniegts {timeout}s limits. Lūdzu samaziniet dziļumu!")
     """
     Minimax search on game tree nodes (exhaustive evaluation without pruning).
 
@@ -180,7 +188,7 @@ def minimax_search(
     if is_maximizing:
         max_eval = float('-inf')
         for move, child in node.children.items():
-            curr_eval = minimax_search(child, depth - 1, False, metrics)
+            curr_eval = minimax_search(child, depth - 1, False, metrics, start_time, timeout)
             if curr_eval > max_eval:
                 max_eval = curr_eval
                 node.best_move = move
@@ -189,7 +197,7 @@ def minimax_search(
     else:
         min_eval = float('inf')
         for move, child in node.children.items():
-            curr_eval = minimax_search(child, depth - 1, True, metrics)
+            curr_eval = minimax_search(child, depth - 1, True, metrics, start_time, timeout)
             if curr_eval < min_eval:
                 min_eval = curr_eval
                 node.best_move = move
@@ -199,7 +207,7 @@ def minimax_search(
 
 # ===== Best Move Selector =====
 
-def find_best_move_alpha_beta(state: GameState, depth: int) -> tuple[int, AIMetrics]:
+def find_best_move_alpha_beta(state: GameState, depth: int, timeout: float = 10.0) -> tuple[int, AIMetrics]:
     """
     Finds the best move using alpha-beta pruning.
 
@@ -226,7 +234,9 @@ def find_best_move_alpha_beta(state: GameState, depth: int) -> tuple[int, AIMetr
         float('-inf'),
         float('inf'),
         is_maximizing,
-        metrics
+        metrics,
+        start_time,
+        timeout
     )
 
     # Calculate elapsed time
@@ -238,7 +248,7 @@ def find_best_move_alpha_beta(state: GameState, depth: int) -> tuple[int, AIMetr
     return root.best_move, metrics
 
 
-def find_best_move_minimax(state: GameState, depth: int) -> tuple[int, AIMetrics]:
+def find_best_move_minimax(state: GameState, depth: int, timeout: float = 10.0) -> tuple[int, AIMetrics]:
     """
     Finds the best move using minimax.
 
@@ -263,7 +273,9 @@ def find_best_move_minimax(state: GameState, depth: int) -> tuple[int, AIMetrics
         root,
         depth,
         is_maximizing,
-        metrics
+        metrics,
+        start_time,
+        timeout
     )
 
     # Calculate elapsed time

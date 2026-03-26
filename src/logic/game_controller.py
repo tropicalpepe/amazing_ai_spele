@@ -17,7 +17,7 @@ from src.logic.logic import (
     apply_final_payout,
     determine_winner
 )
-from src.ai.search import find_best_move_alpha_beta
+from src.ai.search import find_best_move_alpha_beta, find_best_move_minimax
 from src.ai.metrics import AIMetrics
 
 
@@ -120,12 +120,14 @@ class GameController:
 
         return self._state, False
 
-    def make_ai_move(self, depth: int = 15) -> Tuple[int, AIMetrics, bool]:
+    def make_ai_move(self, depth: int = 15, algorithm: str = "Alpha-Beta", timeout: float = 10.0) -> Tuple[int, AIMetrics, bool]:
         """
         Let AI make a move.
 
         Args:
             depth: Search depth for AI algorithm
+            algorithm: The search algorithm to use ("Minimax" or "Alpha-Beta")
+            timeout: Maximum seconds to calculate before forcing abort.
 
         Returns:
             Tuple of (move, metrics, game_ended)
@@ -143,7 +145,10 @@ class GameController:
             raise RuntimeError("It's the player's turn, not AI's turn.")
 
         # Get AI move
-        move, metrics = find_best_move_alpha_beta(self._state, depth)
+        if algorithm == "Minimax":
+            move, metrics = find_best_move_minimax(self._state, depth, timeout)
+        else:
+            move, metrics = find_best_move_alpha_beta(self._state, depth, timeout)
 
         if move is None:
             raise RuntimeError("AI could not find a valid move.")

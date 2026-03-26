@@ -230,7 +230,8 @@ else:
 
                     
                     move, metrics, game_ended = controller.make_ai_move(
-                        depth=st.session_state.depth
+                        depth=st.session_state.depth,
+                        algorithm=st.session_state.algorithm
                     )
 
                     after = controller.state.current_number
@@ -240,10 +241,18 @@ else:
                     st.session_state.game_history.append(
                         f"AI: {before} {op_str} = {after}"
                     )
+                    st.rerun()
 
+                except TimeoutError as te:
+                    st.error(f"🚨 {str(te)}")
+                    st.warning("Spēle tika neatgriezeniski apturēta. Lūdzu, restartējiet spēli izmantojot Alpha-Beta, vai samaziniet dziļumu!")
+                    # Kill the session to prevent auto-restart loops
+                    st.session_state.controller._is_game_over = True
+                    
                 except TypeError:
-
-                    move, metrics, game_ended = controller.make_ai_move()
+                    move, metrics, game_ended = controller.make_ai_move(
+                        algorithm=st.session_state.algorithm
+                    )
                     after = controller.state.current_number
                     st.session_state.last_ai_move = move
                     st.session_state.last_ai_metrics = metrics
@@ -251,11 +260,11 @@ else:
                     st.session_state.game_history.append(
                         f"AI: {before} {op_str} = {after}"
                     )
+                    st.rerun()
 
                 except RuntimeError as e:
                     st.error(str(e))
-
-                st.rerun()
+                    st.rerun()
 
         st.divider()
 
