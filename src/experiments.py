@@ -1,8 +1,6 @@
 import sys
 import random
-import time
 from pathlib import Path
-from statistics import mean
 
 # Pievienojam saiti uz saknes klasi, lai skripts atpazītu importus
 sys.path.append(str(Path(__file__).resolve().parent.parent))

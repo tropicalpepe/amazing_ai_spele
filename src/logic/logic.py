@@ -97,12 +97,6 @@ def is_terminal_state(state: GameState) -> bool:
     Game ends when:
     - Current number <= 10
     - No legal moves available
-
-    Args:
-        state: Game state to check
-
-    Returns:
-        True if game is over, False otherwise
     """
     if state.current_number <= 10:
         return True

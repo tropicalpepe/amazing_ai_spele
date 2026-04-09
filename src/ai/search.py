@@ -32,33 +32,6 @@ def expand_node(node: GameTreeNode, metrics: Optional[AIMetrics] = None) -> None
         child_node = create_node(new_state, node.depth + 1, metrics)
         node.children[move] = child_node
 
-
-def build_game_tree(initial_state: GameState, max_depth: int, metrics: Optional[AIMetrics] = None) -> GameTreeNode:
-    """
-    Builds a game tree up to max_depth.
-
-    Args:
-        initial_state: Starting game state
-        max_depth: Maximum depth to build
-        metrics: Optional metrics tracker
-
-    Returns:
-        Root node of the generated tree
-    """
-    root = create_node(initial_state, 0, metrics)
-
-    def build_recursive(node: GameTreeNode):
-        if node.depth >= max_depth or node.is_terminal:
-            return
-
-        expand_node(node, metrics)
-        for child in node.children.values():
-            build_recursive(child)
-
-    build_recursive(root)
-    return root
-
-
 # ===== Alpha-Beta Search =====
 
 def alpha_beta_search(

@@ -54,16 +54,6 @@ class GameController:
         return generate_starting_numbers()
 
     def start_game(self, chosen_number: int, player_starts: bool) -> GameState:
-        """
-        Start a new game.
-
-        Args:
-            chosen_number: The starting number chosen by player
-            player_starts: True if player goes first, False if AI goes first
-
-        Returns:
-            Initial game state
-        """
         self._state = create_initial_state(chosen_number, player_starts)
         self._is_game_over = False
         self._winner = None
@@ -84,12 +74,12 @@ class GameController:
 
         return get_legal_moves(self._state)
 
-    def make_move(self, divisor: int) -> Tuple[GameState, bool]:
+    def make_move(self, move_value: int) -> Tuple[GameState, bool]:
         """
         Apply a move and update game state.
 
         Args:
-            divisor: The divisor to apply (2 or 3)
+            move_value: 2,3,-5,-7
 
         Returns:
             Tuple of (new_state, game_ended)
@@ -105,11 +95,11 @@ class GameController:
             raise RuntimeError("Game is already over. Cannot make more moves.")
 
         legal_moves = get_legal_moves(self._state)
-        if divisor not in legal_moves:
-            raise ValueError(f"Illegal move: {divisor}. Legal moves: {legal_moves}")
+        if move_value not in legal_moves:
+            raise ValueError(f"Illegal move: {move_value}. Legal moves: {legal_moves}")
 
         # Apply the move
-        self._state = apply_move(self._state, divisor)
+        self._state = apply_move(self._state, move_value)
 
         # Check if game ended
         if is_terminal_state(self._state):
@@ -123,11 +113,6 @@ class GameController:
     def make_ai_move(self, depth: int = 15, algorithm: str = "Alpha-Beta", timeout: float = 10.0) -> Tuple[int, AIMetrics, bool]:
         """
         Let AI make a move.
-
-        Args:
-            depth: Search depth for AI algorithm
-            algorithm: The search algorithm to use ("Minimax" or "Alpha-Beta")
-            timeout: Maximum seconds to calculate before forcing abort.
 
         Returns:
             Tuple of (move, metrics, game_ended)
